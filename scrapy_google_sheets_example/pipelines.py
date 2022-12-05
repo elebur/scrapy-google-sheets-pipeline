@@ -7,11 +7,15 @@ class GoogleSheetsPipeline:
     """Example pipeline for saving data to Google Sheets"""
 
     def __init__(self, sheet_id, range) -> None:
-        # save sheet_id and range for later use in process_item 
+        # Save sheet_id and range for later use in process_item
         self.sheet_id = sheet_id
         self.range = range
-        # load token from pickle file which you hopefully saved to the resources folder
-        token_file = pkgutil.get_data("scrapy_google_sheets_example", "resources/token.pickle")
+        # load token from pickle file which you
+        # hopefully saved to the resources folder
+        token_file = pkgutil.get_data(
+            "scrapy_google_sheets_example",
+            "resources/token.pickle"
+        )
         token = pickle.loads(token_file)
         # build connection to google sheets api
         service = build('sheets', 'v4', credentials=token)
@@ -39,10 +43,10 @@ class GoogleSheetsPipeline:
         body = self._build_body(item)
         # append body to spreadsheed
         self.sheet.values().append(
-            spreadsheetId=self.sheet_id, 
-            range=self.range, 
-            body=body, 
-            valueInputOption="USER_ENTERED" 
+            spreadsheetId=self.sheet_id,
+            range=self.range,
+            body=body,
+            valueInputOption="USER_ENTERED"
         ).execute()
 
     def process_item(self, item, spider):
