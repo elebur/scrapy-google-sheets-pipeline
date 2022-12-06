@@ -61,3 +61,4 @@ You can use the command `scrapy crawl quotes` to start the process.
 - [ ] Saving data from the failed requests to a local file
 - [ ] How to deal with [limits](https://developers.google.com/sheets/api/limits)? [Retry Strategy](https://cloud.google.com/storage/docs/retry-strategy)
 - [ ] if a sheet in trash data will be appended anyway
+- [ ] Tests
