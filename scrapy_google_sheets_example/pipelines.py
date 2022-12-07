@@ -10,6 +10,7 @@ class GoogleSheetsPipeline:
     """
 
     def __init__(self, crawler) -> None:
+        self._check_required_settings(crawler)
         # Sheet id for saving data to.
         self.sheet_id = crawler.settings.get("GOOGLE_SHEET_ID")
         # Get the Item fields that should be saved to the Google Sheet.
@@ -39,6 +40,20 @@ class GoogleSheetsPipeline:
     @classmethod
     def from_crawler(cls, crawler) -> None:
         return cls(crawler)
+
+    def _check_required_settings(self, crawler):
+        """Checking that the required settings exist"""
+        required = ("GOOGLE_SHEET_ID", "GOOGLE_SHEET_TOKEN_FILEPATH")
+
+        not_found = list()
+        for r in required:
+            if r not in crawler.settings:
+                not_found.append(r)
+
+        if not_found:
+            stgns = ", ".join(not_found)
+            msg = f"<GoogleSheetsPipeline> Missing required settings - {stgns}"
+            raise ValueError(msg)
 
     def _build_body(self, item) -> dict:
         """build body for data to submit to google sheets from item"""
