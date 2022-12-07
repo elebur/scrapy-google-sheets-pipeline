@@ -9,38 +9,36 @@ class GoogleSheetsPipeline:
     Pipeline for saving data to Google Sheets
     """
 
-    def __init__(
-        self,
-        sheet_id,
-        export_fields,
-        google_sheet_export_fields,
-        token_file_path
-    ) -> None:
-        # Save sheet_id for later use in process_item
-        self.sheet_id = sheet_id
-        # Get the fields that should be saved to the Google Sheet.
+    def __init__(self, crawler) -> None:
+        # Sheet id for saving data to.
+        self.sheet_id = crawler.settings.get("GOOGLE_SHEET_ID")
+        # Get the Item fields that should be saved to the Google Sheet.
         # If fields aren't set in GOOGLE_SHEET_EXPORT_FIELDS setting,
-        # then try getting them from FEED_EXPORT_FIELDS.
-        self.export_fields = google_sheet_export_fields or export_fields or {}
+        # then try getting them from FEED_EXPORT_FIELDS (it also could be None)
+        self.export_fields = (
+            crawler.settings.get("GOOGLE_SHEET_EXPORT_FIELDS")
+            or crawler.settings.get("FEED_EXPORT_FIELDS")
+            or {}
+        )
 
         # load token from pickle file which you
         # hopefully saved to the "resources" folder
+        token_file_path = crawler.settings.get("GOOGLE_SHEET_TOKEN_FILEPATH")
         with open(token_file_path, "rb") as fin:
             token = pickle.load(fin)
+
+        # Should we replace decimal dot with comma for float.
+        self.replace_dot_with_comma = crawler.settings.get(
+            "GOOGLE_SHEET_REPLACE_DECIMAL_DOT_WITH_COMMA",
+            True)
+
         # build connection to google sheets api
         service = build("sheets", "v4", credentials=token)
         self.sheet = service.spreadsheets()
 
     @classmethod
     def from_crawler(cls, crawler) -> None:
-        return cls(
-            sheet_id=crawler.settings.get('GOOGLE_SHEET_ID'),
-            export_fields=crawler.settings.get('FEED_EXPORT_FIELDS'),
-            google_sheet_export_fields=crawler.settings.get(
-                'GOOGLE_SHEET_EXPORT_FIELDS'),
-            token_file_path=crawler.settings.get(
-                'GOOGLE_SHEET_TOKEN_FILEPATH'),
-        )
+        return cls(crawler)
 
     def _build_body(self, item) -> dict:
         """build body for data to submit to google sheets from item"""
@@ -48,9 +46,9 @@ class GoogleSheetsPipeline:
             """
             Inner function to apply serializer if it is set.
             """
-            # https://github.com/scrapy/scrapy/blob/f9a29f03d9a0eb9173a91f225177b7bee7d382c9/scrapy/exporters.py#L48-L50
             adapter = ItemAdapter(item)
             meta = adapter.get_field_meta(field)
+            # https://github.com/scrapy/scrapy/blob/f9a29f03d9a0eb9173a91f225177b7bee7d382c9/scrapy/exporters.py#L48-L50
             serializer = meta.get('serializer', lambda x: x)
             return serializer(value)
 
@@ -67,10 +65,15 @@ class GoogleSheetsPipeline:
                 self.export_fields[name] = name
 
         values = list()
+
         for field in self.export_fields.keys():
             value = item.get(field, "")
+
             value = serialize(item, field, value)
-            values.append(str(value))
+            s = str(value)
+            if isinstance(value, float) and self.replace_dot_with_comma:
+                s = s.replace(".", ",")
+            values.append(s)
 
         return {'values': [values]}
 

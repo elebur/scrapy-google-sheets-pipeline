@@ -39,10 +39,13 @@ On [this page](https://console.cloud.google.com/projectselector2/iam-admin/quota
 [This page](https://console.cloud.google.com/apis/dashboard) shows statistic for Google API.
 
 ## Settings
-* `GOOGLE_SHEET_ID` - the ID of the Spreadsheet you want to save your data to. You can get the ID from the url. 
+* `GOOGLE_SHEET_ID` (**required**) - the ID of the Spreadsheet you want to save your data to. You can get the ID from the url. 
 For example, for this url https://docs.google.com/spreadsheets/d/1eX8ftT1jKY2MyUcaHFV-Oo93qGP1NgHdcC-4MFm6UUc/edit#gid=0 the ID is **1eX8ftT1jKY2MyUcaHFV-Oo93qGP1NgHdcC-4MFm6UUc**.
-* `GOOGLE_SHEET_TOKEN_FILEPATH` - absolute path to the `token.pickle` file (you got this file after running `get_token.py`)
-* `GOOGLE_SHEET_EXPORT_FIELDS` - same as [FEED\_EXPORT\_FIELDS](https://docs.scrapy.org/en/latest/topics/feed-exports.html?#feed-export-fields), but for Google Sheets. If the setting doesn't exist then FEED\_EXPORT\_FIELDS will be used.
+* `GOOGLE_SHEET_TOKEN_FILEPATH` (**required**) - absolute path to the `token.pickle` file (you got this file after running `get_token.py`)
+* `GOOGLE_SHEET_EXPORT_FIELDS` (**optional**) - same as [FEED\_EXPORT\_FIELDS](https://docs.scrapy.org/en/latest/topics/feed-exports.html?#feed-export-fields), but for Google Sheets. If the setting doesn't exist then FEED\_EXPORT\_FIELDS will be used.
+* `GOOGLE_SHEET_REPLACE_DECIMAL_DOT_WITH_COMMA` (**optional**) - whether to replace dot in float numbers with comma or not (e.g. `8.2` => `8,2`). So such values will be treated as numbers.
+
+    *bool*, default value - *True*
 
 ## Starting the example spider
 The included spider is an example that gets quotes and their authors from [quotes.toscrape.com](http://quotes.toscrape.com/).
